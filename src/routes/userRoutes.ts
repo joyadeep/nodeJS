@@ -9,7 +9,20 @@ userRoute.get("/",(req:express.Request,res:express.Response)=>{
     res.status(200).json({error:false,message:"userRoute executed !!"})
 })
 
-userRoute.post("/login",(req:express.Request,res:express.Response)=>{
+userRoute.get("/users",async(req:express.Request,res:express.Response)=>{
+    try {
+        const result= await UserModel.find();
+        if(!result)
+            return res.status(500).json({error:true,message:"no user found"})
+        return res.status(200).json({error:false,message:result})
+    } catch (error) {
+        console.error(error);
+        return res.status(500).json({error:true,message:"cannot execute route"})
+        
+    }
+})
+
+userRoute.post("/login",async(req:express.Request,res:express.Response)=>{
     try {
         const {email,password}=req.body;
         const schema=Joi.object({
@@ -17,21 +30,46 @@ userRoute.post("/login",(req:express.Request,res:express.Response)=>{
             password:Joi.string().required()
         })
 
-        const {error,value}=schema.validate(req.body);
+        const {error,value}=await schema.validate(req.body);
 
         if(error){
             return res.status(400).json({error:true,message:error.message})
         }
 
-        const result=UserModel.findOne({email:email});
+        const result=await UserModel.findOne({email:email});
         if(!result)
             return res.status(400).json({error:true,message:"user not found"})
         
+        
+
         return res.status(200).json({error:false,message:result})
 
     } catch (error) {
         console.error(error);
         res.status(400).json({error:true,message:error})
+    }
+})
+
+userRoute.get("/test",async(req,res)=>{
+    try {
+        const result=await UserModel.findOne({email:"dev.joyadeep@gmail.com"});
+        if(!result)
+            return res.status(400).json({error:true,message:"user not found"})
+        return res.status(200).json({error:false,message:result})
+    } catch (error) {
+        return res.status(400).json({error:true,message:"something went wrong"})
+    }
+})
+
+userRoute.post("/test",async(req,res)=>{
+    try {
+        const {email,password}=req.body;
+        const result=await UserModel.findOne({email:email});
+        if(!result)
+            return res.status(400).json({error:true,message:"user not found"})
+        return res.status(200).json({error:false,message:result})
+    } catch (error) {
+        return res.status(400).json({error:true,message:"something went wrong"})
     }
 })
 
