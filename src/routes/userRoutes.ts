@@ -40,8 +40,10 @@ userRoute.post("/login",async(req:express.Request,res:express.Response)=>{
         if(!result)
             return res.status(400).json({error:true,message:"user not found"})
         
+        const checkPw=await bcrypt.compare(password,result.password);
+        if(!checkPw)
+            return res.status(400).json({error:true,message:"password not matched !"})
         
-
         return res.status(200).json({error:false,message:result})
 
     } catch (error) {
@@ -106,6 +108,18 @@ userRoute.post("/register",async(req:express.Request,res:express.Response)=>{
     } catch (error) {
         console.error(error);
         res.status(400).json({error:true,message:error})
+    }
+})
+
+userRoute.delete("/:_id",async(req,res)=>{
+    try {
+        const result=await UserModel.findByIdAndDelete(req.params._id);
+
+        if (!result)
+            return res.status(400).json({error:true,message:"user not found"})
+        return res.status(200).json({error:false,message:"user deleted successfully !"})
+    } catch (error) {
+        return res.status(500).json({error:true,message:"cannot execute code !"})
     }
 })
 
