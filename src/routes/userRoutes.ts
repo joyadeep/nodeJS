@@ -76,4 +76,31 @@ userRoute.delete("/:_id",async(req,res)=>{
     }
 })
 
+userRoute.patch("/:_id",async(req,res)=>{
+    try {
+        const {email,username}=req.body;
+
+        const schema=Joi.object({
+            email:Joi.string().email().required(),
+            username:Joi.string().required(),
+        })
+
+        const {error,value}=await schema.validate(req.body)
+
+        if (error)
+            return res.status(401).json({error:true,message:error.message})
+        
+        const result=await UserModel.findByIdAndUpdate(req.params._id,req.body,{new:true});
+
+        if(!result)
+            return res.status(402).json({error:true,message:"cannot update user"})
+        return res.status(200).json({error:false,message:result})
+        
+
+
+    } catch (error) {
+        
+    }
+})
+
 export default userRoute;
